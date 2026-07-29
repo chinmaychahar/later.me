@@ -2,7 +2,7 @@
 
 Write letters to your future self. A tiny, self-hosted FutureMe.
 
-<p align="center">
+<p align="left">
   <img src="https://github.com/user-attachments/assets/3d597426-dc46-446a-a9b3-9ef60ae88a38" width="420" alt="later.me home screen, with its guardian cat">
 </p>
 
