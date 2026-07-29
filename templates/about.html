@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_cat.html" import cat %}
+{% block content %}
+  <div class="about">
+  {{ cat("i guard the letters. no, you can't see them early. yes, i've been asked.") }}
+  <h1>What is later.me?</h1>
+
+  <div class="card">
+    <p>later.me is a tiny, self-hosted way to <strong>write letters to your
+    future self</strong>. Write a letter, pick a date - months or years away -
+    and seal it. When the date arrives, the letter lands in your email inbox.</p>
+  </div>
+
+  <h2>Sealed means sealed</h2>
+  <div class="card">
+    <p>The moment you seal a letter, it's <strong>encrypted on disk</strong>.
+    You can't read it early - not even by opening the files.</p>
+    <p>If you really must peek, it will cost you: a 24-hour cooling-off period
+    before the letter will open, and a permanent <span class="badge">peeked</span>
+    mark so future you knows. Most people who ask to peek never come back
+    after the cooling-off. The impulse passes. The letter keeps its magic.</p>
+  </div>
+
+  <h2>Yours, entirely</h2>
+  <div class="card">
+    <p>There's no company, no account, no server in the cloud. Everything
+    lives on your own machine:</p>
+    <p>· Letters are stored (encrypted) in the <code>data/</code> folder<br>
+       · Delivery happens through <strong>your own email account</strong> over SMTP<br>
+       · The encryption key is <code>data/secret.key</code> - back it up if
+         your letters matter to you</p>
+    <p class="muted">later.me is open source. Clone it, run <code>./setup.sh</code>,
+    and it's yours too.</p>
+  </div>
+
+  <h2>How delivery works</h2>
+  <div class="card">
+    <p>A small script (<code>deliver.py</code>) checks daily whether any sealed
+    letter has reached its date. Due letters are decrypted and emailed to you -
+    then never sent again. Schedule it once and forget it: one morning years
+    from now, past you says hello.</p>
+  </div>
+  </div>
+{% endblock %}

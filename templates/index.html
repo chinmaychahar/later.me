@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "_cat.html" import cat %}
+{% block content %}
+  {% if sealed or sent %}
+    {{ cat("welcome back! your letters are safe with me.") }}
+  {% else %}
+    {{ cat("hi! i'm the keeper of the letters. write your first one?") }}
+  {% endif %}
+  <h1>Letters to future you</h1>
+
+  <h2>Sealed</h2>
+  <div class="card">
+    {% if sealed %}
+      {% for l in sealed %}
+        <a class="letter-row" href="{{ url_for('view_letter', letter_id=l.id) }}">
+          <span class="subject">{{ l.subject }}
+            {% if l.deliver_on <= today %}<span class="badge">due</span>{% endif %}
+            {% if l.unsealed_early %}<span class="badge">peeked</span>{% endif %}
+            {% if l.last_error %}<span class="badge err" title="last delivery attempt failed - open to see why">delivery failed</span>{% endif %}
+            {% if l.peek_requested_at %}<span class="cooloff" title="cooling-off in progress, unlocks 24h after the peek request">⏳</span>{% endif %}
+          </span>
+          <span class="date">arrives {{ l.deliver_on }}<br><span class="until">{{ l.deliver_on | until }}</span></span>
+        </a>
+      {% endfor %}
+    {% else %}
+      <p class="empty">Nothing sealed yet. <a href="{{ url_for('write') }}">Write your first letter.</a></p>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{{ url_for('deliver_now') }}">
+    <button class="quiet" type="submit">check &amp; deliver due letters now</button>
+  </form>
+
+  <h2>Delivered</h2>
+  <div class="card">
+    {% if sent %}
+      {% for l in sent %}
+        <a class="letter-row" href="{{ url_for('view_letter', letter_id=l.id) }}">
+          <span class="subject">{{ l.subject }}</span>
+          <span class="date">sent {{ (l.sent_at or l.deliver_on)[:10] }}</span>
+        </a>
+      {% endfor %}
+    {% else %}
+      <p class="empty">No letters delivered yet.</p>
+    {% endif %}
+  </div>
+
+  {% if sealed or sent %}
+    <p class="footnote">Letters live only on this machine.
+      <a href="{{ url_for('backup') }}">Back them up</a> - keep the key safe.</p>
+  {% endif %}
+{% endblock %}

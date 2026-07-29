@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% from "_cat.html" import cat %}
+{% block content %}
+  {% if body is not none %}
+    {{ cat("a letter from " + letter.created_at[:10] + ". i kept it safe for you.") }}
+  {% elif peek_state == 'cooling' %}
+    {{ cat("still sealed. sleep on it - that's the deal.", mood='no-peek') }}
+  {% elif peek_state == 'ready' %}
+    {{ cat("you came back... alright. it's your letter.") }}
+  {% else %}
+    {{ cat("this one isn't ready yet. patience!", mood='no-peek') }}
+  {% endif %}
+  <h1>{{ letter.subject }}</h1>
+  <p class="muted">
+    written {{ letter.created_at[:10] }} · arrives {{ letter.deliver_on }}
+    {%- if letter.status != 'sent' %} ({{ letter.deliver_on | until }}){% endif %} · to {{ letter.to }}
+    {% if letter.status == 'sent' %}· <strong>delivered</strong>{% endif %}
+    {% if letter.unsealed_early %}· <span class="badge">peeked</span>{% endif %}
+  </p>
+  {% if letter.last_error %}
+    <p class="flash err">Last delivery attempt failed: {{ letter.last_error }}<br>
+      It's still sealed and will be retried on the next daily run. Check your email settings if this keeps happening.</p>
+  {% endif %}
+
+  {% if body is not none %}
+    <div class="card letter-body">{{ body }}</div>
+  {% else %}
+    <div class="card seal">
+      <div class="wax">✉︎</div>
+      <p>This letter is sealed until <strong>{{ letter.deliver_on }}</strong>.</p>
+      <p>Future you is counting on present you to be patient.</p>
+
+      {% if peek_state is none %}
+        <button id="break-btn" class="quiet">break the seal</button>
+
+        <div id="confirm" hidden>
+          <p>are you sure? :D</p>
+          <div id="dodge-area">
+            <button type="button" id="no-btn" class="quiet">no, stay strong</button>
+            <button type="button" id="yes-btn">yes</button>
+          </div>
+          <p id="taunt">&nbsp;</p>
+          <form method="post" action="{{ url_for('peek', letter_id=letter.id) }}">
+            <input type="hidden" name="action" value="request">
+            <button class="quiet" type="submit">request to peek - unlocks in 24 hours</button>
+          </form>
+        </div>
+
+      {% elif peek_state == 'cooling' %}
+        <p>⏳ Cooling-off in progress.</p>
+        <p>You asked to peek. If you still mean it after<br>
+           <strong>{{ unseal_at.strftime('%A %d %b, %H:%M') }}</strong>, come back then.</p>
+        <p class="muted" style="font-size:.9rem">Most people don't come back. Just saying.</p>
+        <form method="post" action="{{ url_for('peek', letter_id=letter.id) }}">
+          <input type="hidden" name="action" value="cancel">
+          <button class="quiet" type="submit">never mind - restore the seal</button>
+        </form>
+
+      {% elif peek_state == 'ready' %}
+        <p>You waited 24 hours and you're still here. Alright.</p>
+        <form method="post">
+          <label>Type "<em>{{ override_phrase }}</em>" to unseal
+            <input type="text" name="override_phrase" autocomplete="off">
+          </label>
+          <button class="quiet" type="submit">break the seal</button>
+        </form>
+        <form method="post" action="{{ url_for('peek', letter_id=letter.id) }}">
+          <input type="hidden" name="action" value="cancel">
+          <button class="quiet" type="submit">actually, no - reseal it</button>
+        </form>
+      {% endif %}
+    </div>
+
+    {% if peek_state is none %}
+    <script>
+      const breakBtn = document.getElementById('break-btn');
+      const confirmBox = document.getElementById('confirm');
+      const area = document.getElementById('dodge-area');
+      const yesBtn = document.getElementById('yes-btn');
+      const noBtn = document.getElementById('no-btn');
+      const taunt = document.getElementById('taunt');
+
+      const TAUNTS = [
+        "nice try 😏", "too slow!", "the seal shall hold",
+        "hey - you said you'd wait", "patience is a virtue…",
+        "you can do this all day, so can I", "I'm literally a button and I have more willpower",
+        "future you says hi", "still no", "forever means forever",
+      ];
+      let dodges = 0, lastDodge = 0;
+
+      function place(btn, x, y) {
+        btn.style.left = x + 'px';
+        btn.style.top = y + 'px';
+      }
+
+      function dodge(fromX, fromY) {
+        const r = yesBtn.getBoundingClientRect();
+        const ar = area.getBoundingClientRect();
+        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        const angle = Math.atan2(cy - fromY, cx - fromX) + (Math.random() - 0.5);
+        let nx = (cx - ar.left) + Math.cos(angle) * 130 - r.width / 2;
+        let ny = (cy - ar.top) + Math.sin(angle) * 130 - r.height / 2;
+        const maxX = ar.width - r.width, maxY = ar.height - r.height;
+        if (nx < 0 || nx > maxX || ny < 0 || ny > maxY) {
+          nx = Math.random() * maxX;   // cornered - teleport
+          ny = Math.random() * maxY;
+        }
+        place(yesBtn, nx, ny);
+
+        const now = performance.now();
+        if (now - lastDodge > 250) {
+          taunt.textContent = TAUNTS[dodges % TAUNTS.length];
+          dodges++;
+          lastDodge = now;
+        }
+      }
+
+      breakBtn.addEventListener('click', () => {
+        breakBtn.hidden = true;
+        confirmBox.hidden = false;
+        place(noBtn, area.clientWidth * 0.15, 45);
+        place(yesBtn, area.clientWidth * 0.62, 45);
+      });
+
+      noBtn.addEventListener('click', () => {
+        confirmBox.hidden = true;
+        breakBtn.hidden = false;
+        dodges = 0;
+        taunt.innerHTML = '&nbsp;';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (confirmBox.hidden) return;
+        const r = yesBtn.getBoundingClientRect();
+        if (Math.hypot(r.left + r.width/2 - e.clientX, r.top + r.height/2 - e.clientY) > 90) return;
+        dodge(e.clientX, e.clientY);
+      });
+
+      // no keyboard cheating: dodging on focus, and even a click never lands
+      yesBtn.addEventListener('focus', () => {
+        yesBtn.blur();
+        const r = yesBtn.getBoundingClientRect();
+        dodge(r.left - 10, r.top - 10);
+        taunt.textContent = "keyboard? cute. 🙃";
+      });
+      yesBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        dodge(e.clientX || 0, e.clientY || 0);
+        taunt.textContent = "HOW- okay fine, that one doesn't count.";
+      });
+      // touchscreens: dodge on the way down, before the tap registers
+      yesBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const t = e.touches[0];
+        dodge(t.clientX, t.clientY);
+      }, { passive: false });
+    </script>
+    {% endif %}
+  {% endif %}
+
+  <form method="post" action="{{ url_for('delete_letter', letter_id=letter.id) }}"
+        class="delete-form"
+        onsubmit="return confirm('Delete this letter for good? {% if body is none %}It\'s still sealed, so you never read it - and once deleted, no one ever will.{% else %}This cannot be undone.{% endif %}');">
+    <button class="danger" type="submit">delete this letter</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>later.me</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #faf7f2; --card: #ffffff; --ink: #2b2620; --muted: #8a8073;
+      --accent: #b5651d; --accent-soft: #f3e3d3; --border: #e8e1d6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: 'Lora', Georgia, serif; line-height: 1.65;
+    }
+    .logo, h1, h2 { font-family: 'Fraunces', Georgia, serif; }
+    header {
+      max-width: 640px; margin: 0 auto; padding: 2.5rem 1.25rem 1rem;
+      display: flex; align-items: baseline; justify-content: space-between;
+    }
+    header a { text-decoration: none; color: inherit; }
+    .logo { font-size: 1.6rem; font-weight: 600; }
+    .logo span { color: var(--accent); }
+    nav a { margin-left: 1rem; color: var(--muted); font-size: .95rem; }
+    nav a:hover { color: var(--accent); }
+    main { max-width: 640px; margin: 0 auto; padding: 0 1.25rem 4rem; }
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    }
+    .flash {
+      background: var(--accent-soft); border: 1px solid var(--accent);
+      border-radius: 8px; padding: .6rem 1rem; margin-bottom: 1rem; font-size: .95rem;
+    }
+    h1 { font-weight: 400; letter-spacing: .01em; }
+    h2 { font-weight: 400; }
+    h2 { font-size: 1.1rem; color: var(--muted); letter-spacing: .04em;
+         text-transform: uppercase; margin-top: 2rem; }
+    label { display: block; margin-top: 1rem; color: var(--muted); font-size: .9rem; }
+    .prompt { display: block; margin-top: .35rem; font-style: italic; color: var(--muted); }
+    .prompt a { text-decoration: none; color: var(--accent); margin-left: .25rem; }
+    input[type=text], input[type=email], input[type=date], textarea {
+      width: 100%; padding: .55rem .7rem; margin-top: .3rem;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: 1rem; background: #fffdf9; color: var(--ink);
+    }
+    textarea { min-height: 14rem; resize: vertical; }
+    button {
+      margin-top: 1.25rem; padding: .6rem 1.4rem; border: none; border-radius: 8px;
+      background: var(--accent); color: white; font-family: inherit;
+      font-size: 1rem; cursor: pointer;
+    }
+    button:hover { filter: brightness(1.08); }
+    button.quiet { background: transparent; color: var(--muted);
+                   border: 1px solid var(--border); }
+    button.danger { background: transparent; color: #a23b2d;
+                    border: 1px solid #e3c4be; font-size: .9rem; }
+    button.danger:hover { background: #fbeeeb; filter: none; }
+    .delete-form { margin-top: 2.5rem; text-align: center; }
+    .letter-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: .55rem 0; border-bottom: 1px dashed var(--border);
+      text-decoration: none; color: inherit;
+    }
+    .letter-row:last-child { border-bottom: none; }
+    .letter-row:hover .subject { color: var(--accent); }
+    .date { color: var(--muted); font-size: .9rem; white-space: nowrap;
+            margin-left: 1rem; text-align: right; }
+    .until { font-size: .8rem; opacity: .8; }
+    .badge { font-size: .75rem; color: var(--accent); border: 1px solid var(--accent);
+             border-radius: 999px; padding: .05rem .5rem; margin-left: .5rem; }
+    .badge.err { color: #a23b2d; border-color: #e3c4be; }
+    .flash.err { background: #fbeeeb; border-color: #e3c4be; color: #7d3226; }
+    .footnote { color: var(--muted); font-size: .85rem; text-align: center; margin-top: 2rem; }
+    .footnote a { color: var(--accent); }
+    .cooloff { font-size: .85rem; margin-left: .35rem; cursor: help; }
+    .muted { color: var(--muted); }
+    .empty { color: var(--muted); font-style: italic; }
+    .chips { margin-top: .4rem; }
+    .chips button { margin: 0 .4rem 0 0; padding: .25rem .7rem; font-size: .85rem; }
+    .letter-body { white-space: pre-wrap; font-size: 1.05rem; line-height: 1.8; }
+    .seal {
+      text-align: center; padding: 2.5rem 1rem; color: var(--muted);
+    }
+    .seal .wax { font-size: 2.2rem; }
+    #dodge-area {
+      position: relative; height: 140px; margin: 1rem auto; max-width: 420px;
+      border: 1px dashed var(--border); border-radius: 10px; overflow: hidden;
+    }
+    #dodge-area button {
+      position: absolute; margin: 0; transition: left .18s ease-out, top .18s ease-out;
+    }
+    #taunt { min-height: 1.4em; font-style: italic; }
+    .about .card { color: #5d564d; }
+    .mascot { display: flex; align-items: flex-end; gap: .65rem; margin-bottom: 1.3rem; }
+    .mascot svg { flex-shrink: 0; }
+    .bubble {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: .45rem .9rem; font-size: .92rem; font-style: italic;
+      color: var(--muted); position: relative; margin-bottom: 8px;
+    }
+    .bubble::before {
+      content: ''; position: absolute; left: -6px; bottom: 12px;
+      width: 10px; height: 10px; background: var(--card);
+      border-left: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      transform: rotate(45deg);
+    }
+    .cat { animation: bob 3.4s ease-in-out infinite; }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2.5px); }
+    }
+    .eye { transform-box: fill-box; transform-origin: center; animation: blink 4.6s infinite; }
+    @keyframes blink {
+      0%, 91%, 100% { transform: scaleY(1); }
+      94%, 96% { transform: scaleY(0.06); }
+    }
+    .ear { transform-box: fill-box; transform-origin: bottom center; }
+    .ear-r { animation: twitch 7s infinite; }
+    .ear-l { animation: twitch 9.3s infinite; }
+    @keyframes twitch {
+      0%, 93%, 100% { transform: rotate(0deg); }
+      95% { transform: rotate(-7deg); }
+      97% { transform: rotate(3deg); }
+    }
+    .lid, .paw-cover { display: none; }
+    .no-peek .eye { display: none; }
+    .no-peek .lid, .no-peek .paw-cover { display: inline; }
+    .no-peek .paws { display: none; }
+    .bubble { animation: bubble-in .25s ease-out; }
+    @keyframes bubble-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="logo" href="{{ url_for('index') }}">later<span>.me</span></a>
+    <nav>
+      <a href="{{ url_for('write') }}">write a letter</a>
+      <a href="{{ url_for('about') }}" title="what is this?">ⓘ</a>
+    </nav>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages() %}
+      {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

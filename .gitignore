@@ -1,0 +1,9 @@
+# never commit these: your letters, your encryption key, your email credentials
+data/
+config.json
+
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.claude/

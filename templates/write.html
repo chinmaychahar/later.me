@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "_cat.html" import cat %}
+{% block content %}
+  {{ cat("take your time. i'll close my eyes while you write.") }}
+  <h1>Write to future you</h1>
+  <div class="card">
+    <form method="post">
+      <label>Deliver to (your email)
+        <input type="email" name="to" required value="{{ default_to }}" placeholder="you@example.com">
+      </label>
+      <label>Subject
+        <input type="text" name="subject" placeholder="A letter from your past self">
+      </label>
+      <label>Deliver on
+        <input type="date" name="deliver_on" id="deliver_on" required min="{{ min_date }}">
+      </label>
+      <div class="chips">
+        {% for label, d in suggestions.items() %}
+          <button type="button" class="quiet" onclick="document.getElementById('deliver_on').value='{{ d }}'">{{ label }}</button>
+        {% endfor %}
+      </div>
+      <label>Dear future me,
+        <span class="prompt" id="prompt">{{ prompts[0] }} <a href="#" id="prompt-next" title="another prompt">↻</a></span>
+        <textarea name="body" required placeholder="Write freely. Once you hit seal, you won't see this again until it arrives."></textarea>
+      </label>
+      <button type="submit">Seal the letter</button>
+    </form>
+  </div>
+  <script>
+    // a gentle nudge for the blank page - cycle through prompts on click
+    const PROMPTS = {{ prompts | tojson }};
+    const promptEl = document.getElementById('prompt');
+    const nextLink = document.getElementById('prompt-next');
+    let pi = 0;
+    nextLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      pi = (pi + 1) % PROMPTS.length;
+      promptEl.childNodes[0].nodeValue = PROMPTS[pi] + ' ';
+    });
+
+    // the cat keeps its word: eyes shut while you're writing your letter
+    const mascot = document.querySelector('.mascot');
+    const bubble = mascot.querySelector('.bubble');
+    const body = document.querySelector('textarea[name=body]');
+    body.addEventListener('focus', () => {
+      mascot.classList.add('no-peek');
+      bubble.textContent = "not looking! promise.";
+    });
+    body.addEventListener('blur', () => {
+      mascot.classList.remove('no-peek');
+      bubble.textContent = "done? seal it whenever you're ready.";
+    });
+  </script>
+{% endblock %}
