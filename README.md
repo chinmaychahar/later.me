@@ -2,6 +2,10 @@
 
 Write letters to your future self. A tiny, self-hosted FutureMe.
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3d597426-dc46-446a-a9b3-9ef60ae88a38" width="420" alt="later.me home screen, with its guardian cat">
+</p>
+
 - **Sealed means sealed** - letters are encrypted on disk the moment you seal
   them. Peeking early costs a 24-hour cooling-off period and a permanent
   "peeked" mark.
