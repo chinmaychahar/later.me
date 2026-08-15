@@ -8,16 +8,29 @@ say() { printf "\n\033[1m%s\033[0m\n" "$1"; }
 say "✉︎  later.me setup"
 
 # 1. python + venv
-if ! command -v python3 >/dev/null; then
-  echo "python3 not found. Install Python 3.10+ first (https://python.org)." >&2
+# Find a Python 3.10+ (system python3 may be too old, e.g. macOS ships 3.9).
+find_python() {
+  for c in python3.13 python3.12 python3.11 python3.10 python3; do
+    if command -v "$c" >/dev/null 2>&1 \
+       && "$c" -c 'import sys; sys.exit(0 if sys.version_info[:2] >= (3, 10) else 1)' 2>/dev/null; then
+      command -v "$c"
+      return 0
+    fi
+  done
+  return 1
+}
+if ! PY="$(find_python)"; then
+  echo "Python 3.10+ not found. Install it first (https://python.org)." >&2
   exit 1
 fi
-if [ ! -d .venv ]; then
-  say "Creating virtual environment..."
-  python3 -m venv .venv
+# Rebuild if the venv is missing or its Python was removed (dangling symlink).
+if [ ! -x .venv/bin/python ]; then
+  say "Creating virtual environment ($("$PY" --version))..."
+  rm -rf .venv
+  "$PY" -m venv .venv
 fi
 say "Installing dependencies..."
-.venv/bin/pip install --quiet --upgrade -r requirements.txt
+.venv/bin/pip install --quiet --disable-pip-version-check --upgrade -r requirements.txt
 
 # 2. email config
 if [ -f config.json ]; then
